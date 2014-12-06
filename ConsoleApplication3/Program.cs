@@ -28,6 +28,13 @@ namespace ConsoleApplication3
 
         static void Main(string[] args)
         {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Invoke using [inputWavFilePath] [outputWavFilePath]!");
+                Console.ReadKey();
+                return;
+            }
+
             Console.WriteLine(args[0] + " reading...");
 
             var header = new WavHeader();
@@ -114,6 +121,8 @@ namespace ConsoleApplication3
                     fs.Close();
                 }
             }
+
+            Console.ReadKey();
         }
 
         private static unsafe void StartCppProcessing(short[] lDataList, short[] rDataList, int sizeOfData)
