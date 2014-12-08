@@ -1,137 +1,138 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using SMiW.Lab.Models;
 
-namespace ConsoleApplication3
+namespace SMiW.Lab
 {
-    class Program
+    public class DspTester
     {
         [DllImport("CppLib.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ProcessCpp")]
-        private static extern unsafe void ProcessCpp(short* lChannelPtr, short* rChannelPtr , int dataSize);
+        private static extern unsafe void ProcessCpp(short* lChannelPtr, short* rChannelPtr, int dataSize);
 
-        struct WavHeader
+        private WavHeader _wavHeader;
+        private short[] _leftChannelData;
+        private short[] _rightChannelData;
+        private int _sizeOfData;
+
+        public DspTester(string inputFilePath)
         {
-            public byte[] RiffId;
-            public uint Size;
-            public byte[] WavId;
-            public byte[] FmtId;
-            public uint FmtSize;
-            public ushort Format;
-            public ushort Channels;
-            public uint SampleRate;
-            public uint BytePerSec;
-            public ushort BlockSize;
-            public ushort Bit;
-            public byte[] DataId;
-            public uint DataSize;
+            ReadInputFile(inputFilePath);
         }
 
-        static void Main(string[] args)
+        private void ReadInputFile(string inputFilePath)
         {
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Invoke using [inputWavFilePath] [outputWavFilePath]!");
-                Console.ReadKey();
-                return;
-            }
-
-            Console.WriteLine(args[0] + " reading...");
-
-            var header = new WavHeader();
-
-            short[] lDataList;
-            short[] rDataList;
-            int sizeOfData;
-
-            using (var fs = new FileStream(args[0], FileMode.Open, FileAccess.Read))
+            using (var fs = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
             using (var br = new BinaryReader(fs))
             {
                 try
                 {
-                    header.RiffId = br.ReadBytes(4);
-                    header.Size = br.ReadUInt32();
-                    header.WavId = br.ReadBytes(4);
-                    header.FmtId = br.ReadBytes(4);
-                    header.FmtSize = br.ReadUInt32();
-                    header.Format = br.ReadUInt16();
-                    header.Channels = br.ReadUInt16();
-                    header.SampleRate = br.ReadUInt32();
-                    header.BytePerSec = br.ReadUInt32();
-                    header.BlockSize = br.ReadUInt16();
-                    header.Bit = br.ReadUInt16();
-                    header.DataId = br.ReadBytes(4);
-                    header.DataSize = br.ReadUInt32();
+                    _wavHeader.RiffId = br.ReadBytes(4);
+                    _wavHeader.Size = br.ReadUInt32();
+                    _wavHeader.WavId = br.ReadBytes(4);
+                    _wavHeader.FmtId = br.ReadBytes(4);
+                    _wavHeader.FmtSize = br.ReadUInt32();
+                    _wavHeader.Format = br.ReadUInt16();
+                    _wavHeader.Channels = br.ReadUInt16();
+                    _wavHeader.SampleRate = br.ReadUInt32();
+                    _wavHeader.BytePerSec = br.ReadUInt32();
+                    _wavHeader.BlockSize = br.ReadUInt16();
+                    _wavHeader.Bit = br.ReadUInt16();
+                    _wavHeader.DataId = br.ReadBytes(4);
+                    _wavHeader.DataSize = br.ReadUInt32();
 
-                    sizeOfData = (int) (header.DataSize/header.BlockSize);
-                    lDataList = new short[sizeOfData];
-                    rDataList = new short[sizeOfData];
+                    _sizeOfData = (int) (_wavHeader.DataSize/_wavHeader.BlockSize);
+                    _leftChannelData = new short[_sizeOfData];
+                    _rightChannelData = new short[_sizeOfData];
 
-                    for (int i = 0; i < sizeOfData; i++)
+                    for (int i = 0; i < _sizeOfData; i++)
                     {
-                        lDataList[i] = (short)br.ReadUInt16();
-                        rDataList[i] = (short)br.ReadUInt16();
+                        _leftChannelData[i] = (short) br.ReadUInt16();
+                        _rightChannelData[i] = (short) br.ReadUInt16();
                     }
                 }
-                finally
-                {
-                    br.Close();
-                    fs.Close();
-                }
+                catch { }
             }
+        }
 
-            Console.WriteLine("channels processing...");
-            StartCppProcessing(lDataList, rDataList, sizeOfData);
+        public void SaveOutputFile(string outputFilePath)
+        {
+            _wavHeader.DataSize = (uint)_sizeOfData * 4;
 
-
-            Console.WriteLine(args[1] + " saving...");
-
-            var lNewDataList = lDataList;
-            var rNewDataList = rDataList;
-
-            header.DataSize = (uint)sizeOfData * 4;
-
-            using (var fs = new FileStream(args[1], FileMode.Create, FileAccess.Write))
+            using (var fs = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
             using (var bw = new BinaryWriter(fs))
             {
                 try
                 {
-                    bw.Write(header.RiffId);
-                    bw.Write(header.Size);
-                    bw.Write(header.WavId);
-                    bw.Write(header.FmtId);
-                    bw.Write(header.FmtSize);
-                    bw.Write(header.Format);
-                    bw.Write(header.Channels);
-                    bw.Write(header.SampleRate);
-                    bw.Write(header.BytePerSec);
-                    bw.Write(header.BlockSize);
-                    bw.Write(header.Bit);
-                    bw.Write(header.DataId);
-                    bw.Write(header.DataSize);
+                    bw.Write(_wavHeader.RiffId);
+                    bw.Write(_wavHeader.Size);
+                    bw.Write(_wavHeader.WavId);
+                    bw.Write(_wavHeader.FmtId);
+                    bw.Write(_wavHeader.FmtSize);
+                    bw.Write(_wavHeader.Format);
+                    bw.Write(_wavHeader.Channels);
+                    bw.Write(_wavHeader.SampleRate);
+                    bw.Write(_wavHeader.BytePerSec);
+                    bw.Write(_wavHeader.BlockSize);
+                    bw.Write(_wavHeader.Bit);
+                    bw.Write(_wavHeader.DataId);
+                    bw.Write(_wavHeader.DataSize);
 
-                    for (int i = 0; i < sizeOfData; i++)
+                    for (int i = 0; i < _sizeOfData; i++)
                     {
-                        bw.Write((ushort)lNewDataList[i]);
-                        bw.Write((ushort)rNewDataList[i]);
+                        bw.Write((ushort) _leftChannelData[i]);
+                        bw.Write((ushort) _rightChannelData[i]);
                     }
                 }
-                finally
-                {
-                    bw.Close();
-                    fs.Close();
-                }
+                catch { }
             }
-
-            Console.ReadKey();
         }
 
-        private static unsafe void StartCppProcessing(short[] lDataList, short[] rDataList, int sizeOfData)
+        public unsafe void StartCppProcessing()
         {
-            fixed(short* lDataListPtr = lDataList)
-            fixed(short* rDataListPtr = rDataList)
+            fixed (short* lDataListPtr = _leftChannelData)
+            fixed (short* rDataListPtr = _rightChannelData)
             {
-                ProcessCpp(lDataListPtr, rDataListPtr, sizeOfData);
+                ProcessCpp(lDataListPtr, rDataListPtr, _sizeOfData);
             }
+        }
+    }
+
+    public static class Program
+    {
+        /// <summary>
+        /// Main entry point
+        /// </summary>
+        /// <param name="args"></param>
+        static void Main(string[] args)
+        {
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Invoke using [inputWavFilePath.wav] [outputWavFilePath.wav]!");
+                Console.ReadKey();
+                return;
+            }
+
+            try
+            {
+                Console.WriteLine("Reading input file '{0}'", args[0]);
+                var dspTester = new DspTester(args[0]);
+
+                Console.WriteLine("Sound processing...");
+                dspTester.StartCppProcessing();
+
+                Console.WriteLine("Saving output file '{0}'", args[1]);
+                dspTester.SaveOutputFile(args[1]);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: {0}", e.Message);
+                Console.ReadKey();
+                return;
+            }
+
+            Console.WriteLine("Successfully saved!");
+            Console.ReadKey();
         }
     }
 }

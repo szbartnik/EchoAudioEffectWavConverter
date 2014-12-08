@@ -7,7 +7,7 @@
     <ProjectGuid>{F0667157-C04F-4AD9-B98B-A92063D2FB7C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApplication3</RootNamespace>
+    <RootNamespace>SMiW.Lab</RootNamespace>
     <AssemblyName>ConsoleApplication3</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Models\WavHeader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
