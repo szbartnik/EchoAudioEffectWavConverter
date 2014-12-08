@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartupGUI", "ConsoleApplication3\StartupGUI.csproj", "{F0667157-C04F-4AD9-B98B-A92063D2FB7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StartupGUI", "StartupGUI\StartupGUI.csproj", "{F0667157-C04F-4AD9-B98B-A92063D2FB7C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4A689F14-3C56-4C09-8024-CC81C9F219F3} = {4A689F14-3C56-4C09-8024-CC81C9F219F3}
 	EndProjectSection
