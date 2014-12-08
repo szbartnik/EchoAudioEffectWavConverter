@@ -6,7 +6,7 @@ namespace SMiW.Lab.Core
     {
         /// <summary>
         /// Main entry point
-        /// Example usage 
+        /// Example usage "DspTester testFile.wav outputFile.wav"
         /// </summary>
         /// <param name="args"></param>
         static void Main(string[] args)
